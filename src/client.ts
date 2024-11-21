@@ -1,5 +1,5 @@
 import {
-    API, BouncedPacket, Client, Item,
+    BouncedPacket, Client, Item, itemsHandlingFlags,
     JSONRecord, LocationInfoPacket,
     MessageNode, NetworkSlot, Player,
 } from "archipelago.js";
@@ -96,7 +96,7 @@ client.messages.on("connected", async (text: string, player: Player, tags: strin
         optionsByte += 2;
         client.socket.send({
             cmd: "ConnectUpdate",
-            items_handling: API.itemsHandlingFlags.all,
+            items_handling: itemsHandlingFlags.all,
             tags: ["DeathLink"]
         });
         // client.deathLink.enableDeathLink();
@@ -233,7 +233,7 @@ form.addEventListener("submit", async (event) => {
             `wss://${hostname}:${port}`,
         name, "MetroCUBEvania", {
             password,
-            items: API.itemsHandlingFlags.all,
+            items: itemsHandlingFlags.all,
             version: {
                 build: 0,
                 major: 5,

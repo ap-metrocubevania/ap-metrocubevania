@@ -23,7 +23,7 @@
     }
   },
   "dependencies": {
-    "archipelago.js": "^2.0.2"
+    "archipelago.js": "^2.0.3"
   },
   "devDependencies": {
     "@types/node": "^22.9.0",
