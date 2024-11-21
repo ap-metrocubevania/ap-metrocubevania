@@ -115,9 +115,11 @@
       // pico8_state.request_pointer_lock is true when 0x5f2d bit 0 and bit 2 are set -- poke(0x5f2d,0x5)
       // note on mouse acceleration for future: // https://github.com/w3c/pointerlock/pull/49
       canvas.addEventListener("click", function () {
-        if (!p8_touch_detected)
-          if (pico8_state.request_pointer_lock)
+        if (!p8_touch_detected) {
+          if (pico8_state.request_pointer_lock) {
             canvas.requestPointerLock();
+          }
+        }
       });
 
     </script>
