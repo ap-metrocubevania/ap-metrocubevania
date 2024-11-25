@@ -99,7 +99,6 @@ client.messages.on("connected", async (text: string, player: Player, tags: strin
             items_handling: itemsHandlingFlags.all,
             tags: ["DeathLink"]
         });
-        // client.deathLink.enableDeathLink();
         DeathLink_Amnesty = options.DeathLink_Amnesty;
     }
     if (options.MedalHunt) {
