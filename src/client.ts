@@ -86,7 +86,7 @@ client.messages.on("connected", async (text: string, player: Player, tags: strin
             game: slot.game,
             alias: slotPlayer.alias,
         }
-    })
+    });
 
     // set up gpio options
     options = await player.fetchSlotData().then(res => res as GameOptions);
