@@ -136,11 +136,7 @@ client.items.on("itemsReceived", async(items: Item[], startingIndex: number) => 
             if (item.sender.slot == thisPlayer) {
                 message_pico8("found counterfeit medal :(");
             } else {
-                if (item.sender.alias === ""){
-                    message_pico8(`got counterfeit medal from ${item.sender.name} :(`.toLowerCase())
-                } else {
-                    message_pico8(`got counterfeit medal from ${item.sender.alias} :(`.toLowerCase())
-                }
+                message_pico8(`got counterfeit medal from ${item.sender.alias !== '' ? item.sender.alias : item.sender.name} :(`.toLowerCase())
             }
         }
 
@@ -155,11 +151,7 @@ client.items.on("itemsReceived", async(items: Item[], startingIndex: number) => 
                     if (item.sender.slot === thisPlayer) {
                         message_pico8(`found ${flag}`.toLowerCase())
                     } else {
-                        if (item.sender.alias === ""){
-                            message_pico8(`got ${flag} from ${item.sender.name}`.toLowerCase())
-                        } else {
-                            message_pico8(`got ${flag} from ${item.sender.alias}`.toLowerCase())
-                        }
+                        message_pico8(`got ${flag} from ${item.sender.alias !== '' ? item.sender.alias : item.sender.name}`.toLowerCase())
                     }
                 }
             }
@@ -177,11 +169,7 @@ client.socket.on("bounced", (packet: BouncedPacket, data: JSONRecord) => {
             const source = packet.data.source as string;
             const player = Object.values(players)
                 .filter(k => k.name == source)[0];
-            if (player.alias === ""){
-                message_pico8(`deathlinked by ${player.name}`.toLowerCase());
-            } else {
-                message_pico8(`deathlinked by ${player.alias}`.toLowerCase());
-            }
+            message_pico8(`deathlinked by ${player.alias !== "" ? player.alias : player.name}`.toLowerCase());
         } else {
             message_pico8("deathlinked");
         }
@@ -196,11 +184,7 @@ client.socket.on("locationInfo", (packet: LocationInfoPacket) => {
             const itemName = new Item(
                 client, location, client.players.self, client.players.findPlayer(location.player)
             ).name;
-            if (players[location.player].alias === "") {
-                message_pico8(`sent ${itemName} to ${players[location.player].name}`.toLowerCase());
-            } else {
-                message_pico8(`sent ${itemName} to ${players[location.player].alias}`.toLowerCase());
-            }
+            message_pico8(`sent ${itemName} to ${players[location.player].alias ? players[location.player].alias : players[location.player].name}`.toLowerCase());
         }
     });
 });
