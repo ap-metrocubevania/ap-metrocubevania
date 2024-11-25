@@ -134,7 +134,7 @@ client.items.on("itemsReceived", async(items: Item[], startingIndex: number) => 
     for (let i: number = 0; i < items.length; i++) {
         let item: Item = items[i];
         if (item.id == base_id + 9) {
-            if (item.sender.slot == thisPlayer) {
+            if (item.sender.slot === thisPlayer) {
                 message_pico8("found counterfeit medal :(");
             } else {
                 message_pico8(`got counterfeit medal from ${item.sender.alias !== '' ? item.sender.alias : item.sender.name} :(`.toLowerCase())
