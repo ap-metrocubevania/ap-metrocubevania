@@ -137,7 +137,7 @@ client.items.on("itemsReceived", async(items: Item[], startingIndex: number) => 
             if (item.sender.slot === thisPlayer) {
                 message_pico8("found counterfeit medal :(");
             } else {
-                message_pico8(`got counterfeit medal from ${item.sender.alias !== '' ? item.sender.alias : item.sender.name} :(`.toLowerCase())
+                message_pico8(`got counterfeit medal from ${item.sender.alias} :(`.toLowerCase())
             }
         }
 
@@ -152,7 +152,7 @@ client.items.on("itemsReceived", async(items: Item[], startingIndex: number) => 
                     if (item.sender.slot === thisPlayer) {
                         message_pico8(`found ${flag}`.toLowerCase())
                     } else {
-                        message_pico8(`got ${flag} from ${item.sender.alias !== '' ? item.sender.alias : item.sender.name}`.toLowerCase())
+                        message_pico8(`got ${flag} from ${item.sender.alias}`.toLowerCase())
                     }
                 }
             }
@@ -168,7 +168,7 @@ client.socket.on("bounced", (packet: BouncedPacket, data: JSONRecord) => {
         // TODO: fix deathlink source message
         if (packet.data.source) {
             const player = players[packet.data.source as number];
-            message_pico8(`deathlinked by ${player.alias !== "" ? player.alias : player.name}`.toLowerCase());
+            message_pico8(`deathlinked by ${player.alias}`.toLowerCase());
         } else {
             message_pico8("deathlinked");
         }
@@ -183,7 +183,7 @@ client.socket.on("locationInfo", (packet: LocationInfoPacket) => {
             const itemName = new Item(
                 client, location, client.players.self, client.players.findPlayer(location.player)
             ).name;
-            message_pico8(`sent ${itemName} to ${players[location.player].alias ? players[location.player].alias : players[location.player].name}`.toLowerCase());
+            message_pico8(`sent ${itemName} to ${players[location.player].alias}`.toLowerCase());
         }
     });
 });
