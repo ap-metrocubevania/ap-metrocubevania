@@ -162,14 +162,12 @@ client.items.on("itemsReceived", async(items: Item[], startingIndex: number) => 
 
 client.socket.on("bounced", (packet: BouncedPacket, data: JSONRecord) => {
     console.log("Bounced ", packet);
-    if (packet.tags.includes('DeathLink') && options.DeathLink !== 0 && !packet.slots.includes(thisPlayer)) {
+    if (packet.tags.includes('DeathLink') && options.DeathLink !== 0 && packet.data.source !== thisPlayer) {
         gpio[25] = gpio[25] | 1;
         DeathLink_Amnesty += 1;
         // TODO: fix deathlink source message
         if (packet.data.source) {
-            const source = packet.data.source as string;
-            const player = Object.values(players)
-                .filter(k => k.name == source)[0];
+            const player = players[packet.data.source as number];
             message_pico8(`deathlinked by ${player.alias !== "" ? player.alias : player.name}`.toLowerCase());
         } else {
             message_pico8("deathlinked");
