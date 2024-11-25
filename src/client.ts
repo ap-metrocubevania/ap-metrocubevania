@@ -6,6 +6,8 @@ import {
 
 // Create a new Archipelago client
 const client: Client = new Client();
+// @ts-ignore
+window.client = client;
 const form: Element = document.querySelector("#connection-details")
 
 //pico-8 related declarations
