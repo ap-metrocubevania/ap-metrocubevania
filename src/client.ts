@@ -41,7 +41,7 @@ const item_flags: Record<string, number[]> = {
 };
 const base_id: number = 19828412012;
 
-let checked_locations = [];
+let checked_locations: number[] = [];
 
 type GameOptions = {
     DeathLink?: number,
@@ -64,7 +64,7 @@ let players: Players = {};
 let DeathLink_Amnesty: number = 0;
 
 function message_pico8(message: string) {
-    let index = 37;
+    let index: number = 37;
     //let log = "";
     for (let i = 0; i < message.length; i++) {
         gpio[index] = message[i].charCodeAt(0);
@@ -77,7 +77,7 @@ client.messages.on("connected", async (text: string, player: Player, tags: strin
     console.log("Connected to server: ", player);
     thisPlayer = player.slot;
     const slots: Record<number, NetworkSlot> = client.players.slots;
-    Object.entries(slots).forEach(([key, slot]) => {
+    Object.entries(slots).forEach(([key, slot]: [string, NetworkSlot]) => {
         const slotNumber: number = parseInt(key)
         const slotPlayer: Player = client.players.findPlayer(slotNumber);
         players[slotNumber] = {
@@ -91,7 +91,7 @@ client.messages.on("connected", async (text: string, player: Player, tags: strin
     // set up gpio options
     options = await player.fetchSlotData().then(res => res as GameOptions);
 
-    let optionsByte= 1;
+    let optionsByte: number = 1;
     if (options.DeathLink !== 0) {
         optionsByte += 2;
         client.socket.send({
@@ -121,7 +121,7 @@ client.items.on("itemsReceived", async(items: Item[], startingIndex: number) => 
     console.log("Received items: ", items);
     // if this is a sync packet reset all our item addresses without changing anything else
     if (startingIndex === 0) {
-        for (let i = 10; i < 20; i++) {
+        for (let i: number = 10; i < 20; i++) {
             gpio[i] = 0;
         }
     }
@@ -130,8 +130,8 @@ client.items.on("itemsReceived", async(items: Item[], startingIndex: number) => 
     // and set the gpio flag if we received it
     // on the scale I expect pico-8 games to be, this will be good enough
     // console.log(`gpio: ${gpio}`)
-    for (let i = 0; i < items.length; i++) {
-        let item = items[i];
+    for (let i: number = 0; i < items.length; i++) {
+        let item: Item = items[i];
         if (item.id == base_id + 9) {
             if (item.sender.slot == thisPlayer) {
                 message_pico8("found counterfeit medal :(");
