@@ -15,12 +15,12 @@ jobs:
       - name: Zip files
         run: |
           zip -r Client.zip Client
-          zip -r MetroCUBEvania.apworld MetroCUBEvania
+          zip -r metrocubevania.apworld MetroCUBEvania
 
       - name: Upload Assets
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           gh release upload ${{ github.event.release.tag_name }} Client.zip
-          gh release upload ${{ github.event.release.tag_name }} MetroCUBEvania.apworld
+          gh release upload ${{ github.event.release.tag_name }} metrocubevania.apworld
           gh release upload ${{ github.event.release.tag_name }} MetroCUBEvania.yaml
