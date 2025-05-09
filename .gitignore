@@ -1,4 +1,4 @@
-
 *.apworld
 *.zip
 .idea/
+Client/static/js/client.*

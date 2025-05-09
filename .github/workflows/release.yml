@@ -12,6 +12,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - uses: actions/setup-node@v4
+        name: Setup Node
+
+      - name: Build typescript
+        run: |
+          cd src
+          npm i -d
+          npm run build
+          cd ../
+
       - name: Zip files
         run: |
           zip -r Client.zip Client
