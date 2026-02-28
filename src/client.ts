@@ -162,13 +162,11 @@ client.items.on("itemsReceived", async(items: Item[], startingIndex: number) => 
 
 client.socket.on("bounced", (packet: BouncedPacket, data: JSONRecord) => {
     console.log("Bounced ", packet);
-    if (packet.tags.includes('DeathLink') && options.DeathLink !== 0 && packet.data.source !== thisPlayer) {
+    if (packet.tags.includes('DeathLink') && options.DeathLink !== 0 && packet.data.source !== players[thisPlayer].alias) {
         gpio[25] = gpio[25] | 1;
         DeathLink_Amnesty += 1;
-        // TODO: fix deathlink source message
         if (packet.data.source) {
-            const player = players[packet.data.source as number];
-            message_pico8(`deathlinked by ${player.alias}`.toLowerCase());
+            message_pico8(`deathlinked by ${packet.data.source}`.toLowerCase());
         } else {
             message_pico8("deathlinked");
         }
@@ -250,9 +248,9 @@ gpio.subscribe(async function (newIndices) {
         console.log("Death");
         gpio[25] = gpio[25] - 2;
         DeathLink_Amnesty -= 1;
-        if (DeathLink_Amnesty === 0) {
+        if (DeathLink_Amnesty <= 0) {
             DeathLink_Amnesty = options.DeathLink_Amnesty;
-            client.socket.send({ cmd: "Bounce", tags: ['DeathLink'], data: {"source": thisPlayer}});
+            client.socket.send({ cmd: "Bounce", tags: ['DeathLink'], data: {"time": Date.now() / 1000, "cause": "MetroCUBEvania death", "source": players[thisPlayer].alias}});
             if (options.DeathLink_Amnesty > 1) {
                 message_pico8("sent deathlink")
             }
