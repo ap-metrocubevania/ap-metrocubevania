@@ -162,14 +162,10 @@ client.items.on("itemsReceived", async(items: Item[], startingIndex: number) => 
 
 client.socket.on("bounced", (packet: BouncedPacket, data: JSONRecord) => {
     console.log("Bounced ", packet);
-    if (packet.tags.includes('DeathLink') && options.DeathLink !== 0 && packet.data.source !== players[thisPlayer].alias) {
+    if (packet.tags.includes('DeathLink') && options.DeathLink !== 0 && packet.data.source && packet.data.source !== players[thisPlayer]?.alias) {
         gpio[25] = gpio[25] | 1;
         DeathLink_Amnesty += 1;
-        if (packet.data.source) {
-            message_pico8(`deathlinked by ${packet.data.source}`.toLowerCase());
-        } else {
-            message_pico8("deathlinked");
-        }
+        message_pico8(`deathlinked by ${packet.data.source}`.toLowerCase());
     }
 });
 
@@ -247,12 +243,15 @@ gpio.subscribe(async function (newIndices) {
     if (options.DeathLink !== 0 && (gpio[25] & 2) !== 0) {
         console.log("Death");
         gpio[25] = gpio[25] - 2;
-        DeathLink_Amnesty -= 1;
-        if (DeathLink_Amnesty <= 0) {
-            DeathLink_Amnesty = options.DeathLink_Amnesty;
-            client.socket.send({ cmd: "Bounce", tags: ['DeathLink'], data: {"time": Date.now() / 1000, "cause": "MetroCUBEvania death", "source": players[thisPlayer].alias}});
-            if (options.DeathLink_Amnesty > 1) {
-                message_pico8("sent deathlink")
+        DeathLink_Amnesty = Math.max(0, DeathLink_Amnesty - 1);
+        if (DeathLink_Amnesty === 0) {
+            DeathLink_Amnesty = options.DeathLink_Amnesty || 0;
+            const playerInfo = players[thisPlayer];
+            if (playerInfo) {
+                client.socket.send({ cmd: "Bounce", tags: ['DeathLink'], data: {"time": Date.now() / 1000, "cause": "MetroCUBEvania death", "source": playerInfo.alias}});
+                if (options.DeathLink_Amnesty && options.DeathLink_Amnesty > 1) {
+                    message_pico8("sent deathlink")
+                }
             }
         }
     }
