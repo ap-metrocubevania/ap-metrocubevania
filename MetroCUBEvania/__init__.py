@@ -1,9 +1,10 @@
-from BaseClasses import Region, Location, Item, ItemClassification, Tutorial, CollectionState
-from worlds.AutoWorld import World, WebWorld 
+from BaseClasses import Region, Location, Item, ItemClassification, Tutorial
+from worlds.AutoWorld import World, WebWorld
 # expand this eventually
 from typing import *
 
 from .options import MCVOptions
+from .rules import set_rules, REGION_CONNECTION_RULES, LOCATION_RULES
 
 json_world = {
     "regions": ["Menu", "main", "grass", "upper ice", "lava", "lower ice"],
@@ -136,15 +137,6 @@ class MCVWorld(World):
         victory = self.multiworld.get_location("victory", self.player)
         victory.address = None
         victory.place_locked_item(MCVItem("victory", ItemClassification.progression, None, self.player))
-        self.multiworld.completion_condition[self.player] = lambda state: state.has("victory", self.player)
-        #currently finds victory location, adds locked victory event, and requires victory event for completion
-
-    def create_rule(self, rule: Any) -> Callable[[CollectionState], bool]:
-        #current black box to convert json_world rule format to an access_rule lambda
-        if rule == "springboards OR double jump":
-            return lambda state: state.has_any(["springboards", "double jump"], self.player)
-        return lambda state: state.has_all(rule, self.player)
-        #currently all my rule objects are None or a list of required items
 
     def get_item_list(self) -> List[str]:
         # current black box to creat a list of item names per count that need to be created
@@ -176,30 +168,23 @@ class MCVWorld(World):
         # TODO - add per option GER handling
         # loop through get_region_map, creating connections between regions
         for region1, region2, rule in self.get_connections():
-            if rule:
-                regions[region1].connect(regions[region2], rule=self.create_rule(rule))
-            else:
-                regions[region1].connect(regions[region2])
+            regions[region1].connect(regions[region2])
         er = False
         if er:
             for region, connection, rule in self.get_er_entrances():
                 cons = [regions[region].create_exit(connection), regions[region].create_en_target(connection)]
                 for con in cons:
                     con.er_type = EntranceType.TWO_WAY
-                    # con.er_group = 
-                    con.access_rule = self.create_rule(rule)
 
         # loop through get_location_map, creating locations
         for region, location, rule in self.get_location_map():
             loc = MCVLocation(self.player, location, self.location_name_to_id[location], regions[region])
-            if rule:
-                if location == "victory" and self.options.medal_hunt.value:
-                    loc.access_rule = self.create_rule(rule+["starting medal","springboards medal","lava medal","cage medal","ice medal"])
-                else:
-                    loc.access_rule = self.create_rule(rule)
             regions[region].locations.append(loc)
 
         self.set_victory()
+
+        # Apply all rules using RuleBuilder
+        set_rules(self)
 
     def create_items(self) -> None:
         # create all items in get_item_list()
