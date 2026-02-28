@@ -3,7 +3,7 @@ from worlds.AutoWorld import World, WebWorld
 #expand this eventually
 from typing import *
 
-from .Options import MCVOptions
+from .options import MCVOptions
 
 json_world = {
     "regions": ["Menu", "main", "grass", "upper ice", "lava", "lower ice"],

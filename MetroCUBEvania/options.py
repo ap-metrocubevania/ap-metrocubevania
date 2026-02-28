@@ -1,7 +1,6 @@
-
 import typing
 from dataclasses import dataclass
-from Options import DeathLink, Toggle, Range, PerGameCommonOptions
+from options import DeathLink, Toggle, Range, PerGameCommonOptions
 
 class ExtraChecks(Toggle):
 	"""Adds 4 extra locations which are checked by reaching points in the game where jingles are played"""
