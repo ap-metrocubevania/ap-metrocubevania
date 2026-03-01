@@ -260,15 +260,14 @@ gpio.subscribe(async function (newIndices) {
     }
     for (let loc in loc_flags) {
         if ((gpio[Math.floor(loc_flags[loc][0] / 8)] & 2 ** (loc_flags[loc][0] % 8)) !== 0) {
+            const locationId = base_id + loc_flags[loc][1];
             if (loc === "victory") {
                 client.goal();
-            } else {
-                console.log(`Checking location id: ${base_id + loc_flags[loc][1]}`)
-                client.check(base_id + loc_flags[loc][1]);
-                if (!checked_locations.includes(base_id + loc_flags[loc][1])){
-                    await client.scout([base_id + loc_flags[loc][1]], 0);
-                }
-                checked_locations.push(base_id + loc_flags[loc][1]);
+            } else if (!checked_locations.includes(locationId)) {
+                console.log(`Checking location id: ${locationId}`);
+                client.check(locationId);
+                await client.scout([locationId], 0);
+                checked_locations.push(locationId);
             }
         }
     }
