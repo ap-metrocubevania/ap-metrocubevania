@@ -8,13 +8,13 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/AmaziaTheAmazing/ap-metrocubevania.git"
+    "url": "git+https://github.com/ap-metrocubevania/ap-metrocubevania.git"
   },
   "license": "CC-BY-NC-SA-4.0",
   "bugs": {
-    "url": "https://github.com/AmaziaTheAmazing/ap-metrocubevania/issues"
+    "url": "https://github.com/ap-metrocubevania/ap-metrocubevania/issues"
   },
-  "homepage": "https://github.com/AmaziaTheAmazing/ap-metrocubevania#readme",
+  "homepage": "https://github.com/ap-metrocubevania/ap-metrocubevania#readme",
   "description": "An Archipelago implementation of the PICO-8 game MetroCUBEvania.",
   "targets": {
     "client": {
