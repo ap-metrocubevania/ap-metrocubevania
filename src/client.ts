@@ -204,10 +204,13 @@ form.addEventListener("submit", async (event) => {
     failed.classList.add("d-none");
     connecting.classList.remove("d-none");
 
+    const isLocalhost = hostname === "localhost" || hostname === "127.0.0.1" || hostname === "::1";
+    const protocol = hostname.startsWith("ws") ? "" : (isLocalhost ? "ws://" : "wss://");
+
     await client.login(
         hostname.startsWith("ws") ?
             `${hostname}:${port}` :
-            `wss://${hostname}:${port}`,
+            `${protocol}${hostname}:${port}`,
         name, "MetroCUBEvania", {
             password,
             items: itemsHandlingFlags.all,
