@@ -32,10 +32,12 @@ description: Default MetroCUBEvania Template
 
 game: MetroCUBEvania
 requires:
-  version: 0.5.0 # Version of Archipelago required for this yaml to work as expected.
+  version: 0.6.6 # Version of Archipelago required for this yaml to work as expected.
 
 MetroCUBEvania:
-  # Game Options
+  ################
+  # Game Options #
+  ################
   progression_balancing:
     # A system that can move progression earlier, to try and prevent the player from getting stuck and bored early.
     # 
@@ -45,8 +47,9 @@ MetroCUBEvania:
     # Minimum value is 0
     # Maximum value is 99
     random: 0
-    random-low: 0
-    random-high: 0
+    random-low: 0 # random value weighted towards lower values
+    random-high: 0 # random value weighted towards higher values
+    random-range-0-99: 0 # random value between 0 and 99
     disabled: 0 # equivalent to 0
     normal: 50 # equivalent to 50
     extreme: 0 # equivalent to 99
@@ -54,11 +57,10 @@ MetroCUBEvania:
   accessibility:
     # Set rules for reachability of your items/locations.
     # 
-    # - **Locations:** ensure everything can be reached and acquired.
-    # - **Items:** ensure all logically relevant items can be acquired.
-    # - **Minimal:** ensure what is needed to reach your goal can be acquired.
-    locations: 0
-    items: 50
+    # **Full:** ensure everything can be reached and acquired.
+    # 
+    # **Minimal:** ensure what is needed to reach your goal can be acquired.
+    full: 50
     minimal: 0
 
   extra_checks:
@@ -67,7 +69,7 @@ MetroCUBEvania:
     'true': 0
 
   medal_hunt:
-    # Whether you must collect all 5 medal items before the route to the boss opens. Currently disabled
+    # Whether you must collect all 5 medal items before the route to the boss opens.
     'false': 50
     'true': 0
 
@@ -77,7 +79,7 @@ MetroCUBEvania:
     'true': 0
 
   death_link:
-    # When you die, everyone dies. Of course the reverse is true too.
+    # When you die, everyone who enabled death link dies. Of course, the reverse is true too.
     'false': 50
     'true': 0
 
@@ -89,10 +91,13 @@ MetroCUBEvania:
     # Maximum value is 50
     10: 50
     random: 0
-    random-low: 0
-    random-high: 0
+    random-low: 0 # random value weighted towards lower values
+    random-high: 0 # random value weighted towards higher values
+    random-range-1-50: 0 # random value between 1 and 50
 
-  # Item & Location Options
+  ###########################
+  # Item & Location Options #
+  ###########################
   local_items:
     # Forces these items to be in their native world.
     []
@@ -102,7 +107,7 @@ MetroCUBEvania:
     []
 
   start_inventory:
-    # Start with these items.
+    # Start with the specified amount of these items. Example: "Bomb: 1"
     {}
 
   start_hints:
@@ -123,4 +128,8 @@ MetroCUBEvania:
 
   item_links:
     # Share part of your item pool with other players.
+    []
+
+  plando_items:
+    # Generic items plando.
     []
