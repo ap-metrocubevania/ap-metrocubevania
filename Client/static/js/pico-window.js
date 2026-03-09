@@ -584,7 +584,7 @@ function p8_run_cart() {
 
     }
     e.type = "application/javascript";
-    e.src = "metrocubevania.js";
+    e.src = "static/js/metrocubevania.js";
     e.id = "e_script";
 
     document.body.appendChild(e); // load and run
