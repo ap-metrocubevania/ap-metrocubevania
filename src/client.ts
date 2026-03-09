@@ -116,7 +116,9 @@ function setupClientListeners(client: Client) {
         client.socket.send({ cmd: "Sync" });
 
         // stop listening for connected events
+        client.messages.off("connected", connected);
     }
+    client.messages.on("connected", connected);
 
     // add item handler for gpio layer
     client.items.on("itemsReceived", async(items: Item[], startingIndex: number) => {
