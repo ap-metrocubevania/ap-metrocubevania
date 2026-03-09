@@ -276,7 +276,14 @@ gpio.subscribe(async function (newIndices) {
             DeathLink_Amnesty = options.DeathLink_Amnesty || 0;
             const playerInfo = players[thisPlayer];
             if (playerInfo) {
-                client.socket.send({ cmd: "Bounce", tags: ['DeathLink'], data: {"time": Date.now() / 1000, "cause": "MetroCUBEvania death", "source": playerInfo.alias}});
+                client.socket.send({
+                    cmd: "Bounce",
+                    tags: ['DeathLink'],
+                    data: {
+                        "time": Date.now() / 1000,
+                        "cause": "MetroCUBEvania death",
+                        "source": playerInfo.alias
+                    }});
                 if (options.DeathLink_Amnesty && options.DeathLink_Amnesty > 1) {
                     message_pico8("sent deathlink")
                 }
