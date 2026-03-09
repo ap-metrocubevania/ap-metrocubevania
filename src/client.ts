@@ -239,8 +239,8 @@ form.addEventListener("submit", async (event) => {
             items: itemsHandlingFlags.all,
             version: {
                 build: 0,
-                major: 5,
-                minor: 0,
+                major: 6,
+                minor: 6,
             },
         }
     ).then(() => {
