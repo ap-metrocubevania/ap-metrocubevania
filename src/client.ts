@@ -5,9 +5,7 @@ import {
 } from "archipelago.js";
 
 // Create a new Archipelago client
-const client: Client = new Client();
-// @ts-ignore
-window.client = client;
+let client: Client | null = null;
 const form: Element = document.querySelector("#connection-details")
 
 //pico-8 related declarations
@@ -74,113 +72,123 @@ function message_pico8(message: string) {
     }
 }
 
-// Set up event listeners
-client.messages.on("connected", async (text: string, player: Player, tags: string[], nodes: MessageNode[]) => {
-    console.log("Connected to server: ", player);
-    thisPlayer = player.slot;
-    const slots: Record<number, NetworkSlot> = client.players.slots;
-    Object.entries(slots).forEach(([key, slot]: [string, NetworkSlot]) => {
-        const slotNumber: number = parseInt(key)
-        const slotPlayer: Player = client.players.findPlayer(slotNumber);
-        players[slotNumber] = {
-            slot: slotNumber,
-            name: slot.name,
-            game: slot.game,
-            alias: slotPlayer.alias,
-        }
-    });
-
-    // set up gpio options
-    options = await player.fetchSlotData().then(res => res as GameOptions);
-
-    let optionsByte: number = 1;
-    if (options.DeathLink !== 0) {
-        optionsByte += 2;
-        client.socket.send({
-            cmd: "ConnectUpdate",
-            items_handling: itemsHandlingFlags.all,
-            tags: ["DeathLink"]
+function setupClientListeners(client: Client) {
+    // Set up event listeners
+    const connected = async (text: string, player: Player, tags: string[], nodes: MessageNode[]) => {
+        console.log("Connected to server: ", player);
+        thisPlayer = player.slot;
+        const slots: Record<number, NetworkSlot> = client.players.slots;
+        Object.entries(slots).forEach(([key, slot]: [string, NetworkSlot]) => {
+            const slotNumber: number = parseInt(key)
+            const slotPlayer: Player = client.players.findPlayer(slotNumber);
+            players[slotNumber] = {
+                slot: slotNumber,
+                name: slot.name,
+                game: slot.game,
+                alias: slotPlayer.alias,
+            }
         });
-        DeathLink_Amnesty = options.DeathLink_Amnesty;
-    }
-    if (options.MedalHunt) {
-        optionsByte += 4;
-    }
-    if (options.ExtraCheckpoint) {
-        optionsByte += 8;
-    }
-    if (options.ExtraChecks) {
-        optionsByte += 16;
-    }
-    gpio[20] = optionsByte;
 
-    client.socket.send({ cmd: "Sync" });
-});
+        // set up gpio options
+        options = await player.fetchSlotData().then(res => res as GameOptions);
 
-// add item handler for gpio layer
-client.items.on("itemsReceived", async(items: Item[], startingIndex: number) => {
-    console.log("Received items: ", items);
-    // if this is a sync packet reset all our item addresses without changing anything else
-    if (startingIndex === 0) {
-        for (let i: number = 10; i < 20; i++) {
-            gpio[i] = 0;
+        let optionsByte: number = 1;
+        if (options.DeathLink !== 0) {
+            optionsByte += 2;
+            client.socket.send({
+                cmd: "ConnectUpdate",
+                items_handling: itemsHandlingFlags.all,
+                tags: ["DeathLink"]
+            });
+            DeathLink_Amnesty = options.DeathLink_Amnesty;
         }
+        if (options.MedalHunt) {
+            optionsByte += 4;
+        }
+        if (options.ExtraCheckpoint) {
+            optionsByte += 8;
+        }
+        if (options.ExtraChecks) {
+            optionsByte += 16;
+        }
+        gpio[20] = optionsByte;
+
+        client.socket.send({ cmd: "Sync" });
+
+        // stop listening for connected events
     }
 
-    // go through all our item addresses and if they are not set, check the received items for their ap id,
-    // and set the gpio flag if we received it
-    // on the scale I expect pico-8 games to be, this will be good enough
-    // console.log(`gpio: ${gpio}`)
-    for (let i: number = 0; i < items.length; i++) {
-        let item: Item = items[i];
-        if (item.id == base_id + 9) {
-            if (item.sender.slot === thisPlayer) {
-                message_pico8("found counterfeit medal :(");
-            } else {
-                message_pico8(`got counterfeit medal from ${item.sender.alias} :(`.toLowerCase())
+    // add item handler for gpio layer
+    client.items.on("itemsReceived", async(items: Item[], startingIndex: number) => {
+        console.log("Received items: ", items);
+        // if this is a sync packet reset all our item addresses without changing anything else
+        if (startingIndex === 0) {
+            for (let i: number = 10; i < 20; i++) {
+                gpio[i] = 0;
             }
         }
 
-        for (const flag in item_flags) {
-            if (base_id + item_flags[flag][1] === item.id) {
-                const byte = Math.floor(item_flags[flag][0] / 8) + 10;
-                const item_bit = 2 ** (item_flags[flag][0] % 8);
-                if (gpio[byte] & item_bit) {  // yes this is supposed to be bitwise and
-                    console.log(`${flag} has already been received`);
+        // go through all our item addresses and if they are not set, check the received items for their ap id,
+        // and set the gpio flag if we received it
+        // on the scale I expect pico-8 games to be, this will be good enough
+        // console.log(`gpio: ${gpio}`)
+        for (let i: number = 0; i < items.length; i++) {
+            let item: Item = items[i];
+            if (item.id == base_id + 9) {
+                if (item.sender.slot === thisPlayer) {
+                    message_pico8("found counterfeit medal :(");
                 } else {
-                    gpio[byte] |= item_bit;
-                    if (item.sender.slot === thisPlayer) {
-                        message_pico8(`found ${flag}`.toLowerCase())
+                    message_pico8(`got counterfeit medal from ${item.sender.alias} :(`.toLowerCase())
+                }
+            }
+
+            for (const flag in item_flags) {
+                if (base_id + item_flags[flag][1] === item.id) {
+                    const byte = Math.floor(item_flags[flag][0] / 8) + 10;
+                    const item_bit = 2 ** (item_flags[flag][0] % 8);
+                    if (gpio[byte] & item_bit) {  // yes this is supposed to be bitwise and
+                        console.log(`${flag} has already been received`);
                     } else {
-                        message_pico8(`got ${flag} from ${item.sender.alias}`.toLowerCase())
+                        gpio[byte] |= item_bit;
+                        if (item.sender.slot === thisPlayer) {
+                            message_pico8(`found ${flag}`.toLowerCase())
+                        } else {
+                            message_pico8(`got ${flag} from ${item.sender.alias}`.toLowerCase())
+                        }
                     }
                 }
             }
         }
-    }
-});
+    });
 
-client.socket.on("bounced", (packet: BouncedPacket, data: JSONRecord) => {
-    console.log("Bounced ", packet);
-    if (packet.tags.includes('DeathLink') && options.DeathLink !== 0 && packet.data.source && packet.data.source !== players[thisPlayer]?.alias) {
-        gpio[25] = gpio[25] | 1;
-        DeathLink_Amnesty += 1;
-        message_pico8(`deathlinked by ${packet.data.source}`.toLowerCase());
-    }
-});
-
-//add location info listener to give game sent item text
-client.socket.on("locationInfo", (packet: LocationInfoPacket) => {
-    console.log("Location Info: ", packet);
-    packet.locations.forEach(location => {
-        if (location.player !== thisPlayer) {
-            const itemName = new Item(
-                client, location, client.players.self, client.players.findPlayer(location.player)
-            ).name;
-            message_pico8(`sent ${itemName} to ${players[location.player].alias}`.toLowerCase());
+    client.socket.on("bounced", (packet: BouncedPacket, data: JSONRecord) => {
+        console.log("Bounced ", packet);
+        if (
+            options.DeathLink !== 0
+            && packet.tags
+            && packet.tags.includes('DeathLink')
+            && packet.data.source
+            && packet.data.source !== players[thisPlayer]?.alias
+        ) {
+            gpio[25] = gpio[25] | 1;
+            DeathLink_Amnesty += 1;
+            message_pico8(`deathlinked by ${packet.data.source}`.toLowerCase());
         }
     });
-});
+
+    //add location info listener to give game sent item text
+    client.socket.on("locationInfo", (packet: LocationInfoPacket) => {
+        console.log("Location Info: ", packet);
+        packet.locations.forEach(location => {
+            if (location.player !== thisPlayer) {
+                const itemName = new Item(
+                    client, location, client.players.self, client.players.findPlayer(location.player)
+                ).name;
+                message_pico8(`sent ${itemName} to ${players[location.player].alias}`.toLowerCase());
+            }
+        });
+    });
+}
 
 // Connect to the Archipelago server
 form.addEventListener("submit", async (event) => {
@@ -203,6 +211,21 @@ form.addEventListener("submit", async (event) => {
     connected.classList.add("d-none");
     failed.classList.add("d-none");
     connecting.classList.remove("d-none");
+
+    // Reset global state
+    checked_locations = [];
+    thisPlayer = 0;
+    players = {};
+    options = {};
+    DeathLink_Amnesty = 0;
+
+    // Create a new client instance
+    client = new Client();
+    // @ts-ignore
+    window.client = client;
+
+    // Set up event listeners for the new client
+    setupClientListeners(client);
 
     const isLocalhost = hostname === "localhost" || hostname === "127.0.0.1" || hostname === "::1";
     const protocol = hostname.startsWith("ws") ? "" : (isLocalhost ? "ws://" : "wss://");
@@ -243,6 +266,8 @@ form.addEventListener("submit", async (event) => {
 // sending information to the pico8 will trigger this function sending all checks to ap again
 // if you always send information to the pico8 when the gpio updates, that can cause an infinite loop
 gpio.subscribe(async function (newIndices) {
+    if (!client) return;
+
     if (options.DeathLink !== 0 && (gpio[25] & 2) !== 0) {
         console.log("Death");
         gpio[25] = gpio[25] - 2;
