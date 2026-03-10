@@ -25,7 +25,7 @@ jobs:
       - name: Zip files
         run: |
           zip -r Client.zip Client
-          zip -r metrocubevania.apworld MetroCUBEvania
+          zip -r metrocubevania.apworld metrocubevania
 
       - name: Upload Assets
         env:
